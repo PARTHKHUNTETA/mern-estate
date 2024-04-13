@@ -11,7 +11,7 @@ dotenv.config();
 
 connectDB();
 
-app.use('/api/user/auth', AuthRouter)
+app.use('/api/auth', AuthRouter)
 app.use('/api/user', UserRouter)
 
 app.use(notFound);
