@@ -24,6 +24,7 @@ export const signUp = async (req, res, next) => {
             res.status(409)
             throw new Error("This Username already exists!");
         }
+        const hashedPassword = bcryptjs.hashSync(password, 10); // for encrypt the password
         const newUser = new User({ username, email, password: hashedPassword });
         await newUser.save();
         res.status(201).json('User created successfully!');
@@ -49,7 +50,7 @@ export const signIn = async (req, res, next) => {
             throw new Error("User not Found!");
         }
 
-        const validPassword = bcryptjs.compareSync(password, user.password)
+        const validPassword = bcryptjs.compareSync(password, user.password) //for comparison of password
         if (!validPassword) {
             res.status(401)
             throw new Error("Wrong Credentials")

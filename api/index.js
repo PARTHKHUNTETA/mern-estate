@@ -1,12 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv'
 import connectDB from './Config/db.js';
+import cookieParser from 'cookie-parser';
 import UserRouter from './routes/user.route.js'
 import AuthRouter from './routes/auth.route.js'
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser())
 dotenv.config();
 
 connectDB();
