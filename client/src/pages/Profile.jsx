@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   getStorage,
   ref,
@@ -7,6 +7,15 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { app } from "../utils/firebase";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserFailure,
+  deleteUserSuccess,
+} from "../redux/slices/userSlice.js";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { currentUser, error, loading } = useSelector((store) => store.user);
@@ -15,12 +24,25 @@ const Profile = () => {
   const [filePercent, setFilePercent] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
     }
   }, [file]);
+
+  useEffect(() => {
+    let id = setTimeout(() => {
+      setUpdateSuccess(false);
+    }, 2000);
+
+    return () => {
+      clearTimeout(id);
+    };
+  }, [updateSuccess]);
 
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
@@ -46,7 +68,51 @@ const Profile = () => {
     );
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+
+      const res = await fetch(`api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (err) {
+      dispatch(updateUserFailure(err.message));
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+
+      const res = await fetch(`api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+
+      dispatch(deleteUserSuccess());
+      setUpdateSuccess(true);
+    } catch (err) {
+      dispatch(deleteUserFailure(err.message));
+    }
+  };
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -66,7 +132,7 @@ const Profile = () => {
           accept="image/*"
         />
         <img
-          src={formData.avatar || currentUser?.avatar}
+          src={formData?.avatar || currentUser?.avatar}
           alt="Profile Photo"
           onClick={() => fileRef.current.click()}
           className=" mt-2 object-cover self-center rounded-full h-24 w-24 cursor-pointer"
@@ -93,7 +159,7 @@ const Profile = () => {
           id="username"
           className="border p-3 rounded-lg"
           onChange={handleChange}
-          value={currentUser?.username || ""}
+          defaultValue={currentUser?.username || ""}
         ></input>
         <input
           type="email"
@@ -101,7 +167,7 @@ const Profile = () => {
           id="email"
           className="border p-3 rounded-lg"
           onChange={handleChange}
-          value={currentUser?.email || ""}
+          defaultValue={currentUser?.email || ""}
         ></input>
         <input
           type="password"
@@ -112,6 +178,11 @@ const Profile = () => {
         ></input>
 
         {error && <p className="text-red-500 my-5 text-center">{error}</p>}
+        {updateSuccess && (
+          <p className="text-green-800 my-5 text-center">
+            Updated Successfully
+          </p>
+        )}
 
         <button
           disabled={loading}
@@ -124,7 +195,7 @@ const Profile = () => {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <button className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 ">
+        <button onClick={handleDeleteUser} className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 ">
           Delete Account
         </button>
         <button className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 ">

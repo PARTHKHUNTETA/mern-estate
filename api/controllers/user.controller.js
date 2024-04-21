@@ -36,3 +36,20 @@ export const updateUser = async (req, res, next) => {
     }
 }
 
+export const deleteUser = async (req, res, next) => {
+
+    try {
+        if (req.user.userId != req.params.id) {
+            res.status(401);
+            throw new Error('You are not authorized to perform this action');
+        }
+
+        await User.findByIdAndDelete(req.user.userId)
+        res.clearCookie('access_token');
+        res.status(200).json('User has been deleted');
+    }
+    catch (err) {
+        next(err);
+    }
+}
+

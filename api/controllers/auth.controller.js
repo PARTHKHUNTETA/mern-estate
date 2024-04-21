@@ -71,8 +71,8 @@ export const google = async (req, res, next) => {
 
         if (user) {
             generateToken(res, user._id)
-            delete user['password']
-            res.status(200).json(user)
+            const { password, ...rest } = user._doc;
+            res.status(200).json(rest)
         } else {
             const generatedPassword =
                 Math.random().toString(36).slice(-8) +
@@ -101,3 +101,12 @@ export const google = async (req, res, next) => {
         next(err)
     }
 }
+
+export const signOut = async (req, res, next) => {
+    try {
+        res.clearCookie('access_token');
+        res.status(200).json('User has been logged out!');
+    } catch (error) {
+        next(error);
+    }
+};

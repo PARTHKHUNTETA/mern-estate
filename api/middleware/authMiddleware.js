@@ -1,24 +1,21 @@
 import Jwt from "jsonwebtoken";
+import { errorHandle } from "../utils/error.js";
 
-const protect = async (req, res, next) => {
-  
+const protect = (req, res, next) => {
+
     // Get token from header if it exists
     const token = req.cookies.access_token;
     if (token) {
         try {
-
-            //decoding the jwt token to get the userId
             const decoded = Jwt.verify(token, process.env.JWT_SECRET);
             req.user = decoded
             next();
         }
         catch (error) {
-            res.status(401);
-            throw new Error("Not authorized ,invalid token");
+            next(errorHandle(401, "Not authorized ,invalid token"))
         }
     } else {
-        res.status(401);
-        throw new Error("Not authorized ,no token");
+        next(errorHandle(401, " You are not authorized, no token"))
     }
 }
 
