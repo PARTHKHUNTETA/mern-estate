@@ -14,6 +14,7 @@ import {
   deleteUserStart,
   deleteUserFailure,
   deleteUserSuccess,
+  signOutUserStart,
 } from "../redux/slices/userSlice.js";
 import { useNavigate } from "react-router-dom";
 
@@ -113,6 +114,21 @@ const Profile = () => {
       dispatch(deleteUserFailure(err.message));
     }
   };
+
+  const handleLogoutUser = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout", { method: "POST" });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(data.message));
+    }
+  };
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -195,10 +211,16 @@ const Profile = () => {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <button onClick={handleDeleteUser} className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 ">
+        <button
+          onClick={handleDeleteUser}
+          className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 "
+        >
           Delete Account
         </button>
-        <button className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 ">
+        <button
+          onClick={handleLogoutUser}
+          className="bg-transparent text-red-500 p-3 rounded-lg uppercase hover: opacity-95 "
+        >
           Sign out
         </button>
       </div>
