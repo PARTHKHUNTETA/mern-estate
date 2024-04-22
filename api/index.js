@@ -4,6 +4,7 @@ import connectDB from './Config/db.js';
 import cookieParser from 'cookie-parser';
 import UserRouter from './routes/user.route.js'
 import AuthRouter from './routes/auth.route.js'
+import ListingRouter from './routes/listing.route.js'
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 const app = express();
 
@@ -15,6 +16,7 @@ connectDB();
 
 app.use('/api/auth', AuthRouter)
 app.use('/api/user', UserRouter)
+app.use('/api/listing', ListingRouter)
 
 app.use(notFound);
 app.use(errorHandler)

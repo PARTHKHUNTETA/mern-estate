@@ -3,6 +3,10 @@ import bcryptjs from 'bcryptjs'
 import generateToken from '../utils/generateToken.js';
 
 
+export const test = (req, res) => {
+    res.json({ message: 'Hello From Auth Route!' })
+}
+
 export const signUp = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;

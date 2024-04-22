@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import bcryptjs from 'bcryptjs'
 
 export const test = (req, res) => {
-    res.json({ message: 'Hello World!' })
+    res.json({ message: 'Hello From user Route!' })
 }
 
 export const updateUser = async (req, res, next) => {
